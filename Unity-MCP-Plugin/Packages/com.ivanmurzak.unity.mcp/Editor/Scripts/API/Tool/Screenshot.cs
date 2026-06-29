@@ -31,7 +31,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.API
         // (~59 MB worst case) while staying well clear of that ceiling. Going higher has little
         // value: Claude's vision downsamples images to ~1568 px on the longest edge before the
         // model sees them, so extra resolution past ~4K only inflates the payload.
-        private const int MaxScreenshotDimension = 3840;
+        private const int MaxScreenshotDimension = 720;
 
         // Scale (width, height) so the longest edge is at most MaxScreenshotDimension, preserving
         // aspect ratio. Returns the input unchanged when it is already within the limit.

@@ -11,6 +11,7 @@
 #nullable enable
 using System;
 using System.ComponentModel;
+using System.IO;
 using System.Reflection;
 using com.IvanMurzak.McpPlugin;
 using com.IvanMurzak.McpPlugin.Common.Model;
@@ -93,6 +94,12 @@ namespace com.IvanMurzak.Unity.MCP.Editor.API
                 RenderTexture? scaledRt = null;
                 Texture2D? tex = null;
                 byte[]? pngBytes = null;
+
+                // 保存路径（在 finally 外部声明以便后续使用）
+                var dir = Path.Combine(Application.dataPath, "..", "Screenshots");
+                Directory.CreateDirectory(dir);
+                var fileName = $"gameview_{DateTime.Now:yyyyMMdd_HHmmss}.jpg";
+                var savePath = Path.Combine(dir, fileName);
                 try
                 {
                     // When the Game View is within the limit (scale == 1) the read path is
@@ -124,7 +131,11 @@ namespace com.IvanMurzak.Unity.MCP.Editor.API
                     }
 
                     tex.Apply();
-                    pngBytes = tex.EncodeToPNG();
+
+                    // 保存截图到本地磁盘
+                    File.WriteAllBytes(savePath, tex.EncodeToJPG(50));
+
+                    pngBytes = tex.EncodeToJPG(50);
                 }
                 finally
                 {
@@ -135,8 +146,9 @@ namespace com.IvanMurzak.Unity.MCP.Editor.API
                         UnityEngine.Object.DestroyImmediate(tex);
                 }
 
-                return ResponseCallTool.Image(pngBytes, McpPlugin.Common.Consts.MimeType.ImagePng,
-                    $"Screenshot from Game View ({width}x{height})");
+                var sizeKb = pngBytes.Length / 1024f;
+                return ResponseCallTool.Image(pngBytes, "image/jpeg",
+                    $"Screenshot from Game View ({width}x{height}, {sizeKb:F1} KB). Saved to: {savePath}");
             });
         }
     }
